@@ -1,6 +1,6 @@
 /* @flow */
 
-import Expo, { KeepAwake } from 'expo';
+import Expo from 'expo';
 import * as React from 'react';
 import { StatusBar, View } from 'react-native';
 import {

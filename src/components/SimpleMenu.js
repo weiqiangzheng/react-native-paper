@@ -43,8 +43,8 @@ class SimpleMenu extends React.Component<Props> {
     const selectedItemStyle = { backgroundColor: theme.colors.disabled };
 
     return (
-      <ThemedPortal position={-1}>
-        <Paper elevation={2} style={{ height }}>
+      <ThemedPortal position={1}>
+        <Paper style={{ elevation: 8, height, width: '90%' }}>
           <FlatList
             style={styles.container}
             contentContainerStyle={styles.content}
