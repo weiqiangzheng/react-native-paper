@@ -4,6 +4,7 @@ import React from 'react';
 import { FlatList, Text, StyleSheet } from 'react-native';
 import Paper from './Paper';
 import TouchableRipple from './TouchableRipple';
+import ThemedPortal from './Portal/ThemedPortal';
 import withTheme from '../core/withTheme';
 import { type Theme } from '../types';
 
@@ -42,30 +43,32 @@ class SimpleMenu extends React.Component<Props> {
     const selectedItemStyle = { backgroundColor: theme.colors.disabled };
 
     return (
-      <Paper elevation={2} style={{ height }}>
-        <FlatList
-          style={styles.container}
-          contentContainerStyle={styles.content}
-          data={data}
-          keyExtractor={SimpleMenu.keyExtractor}
-          renderItem={({ item }) => {
-            const key = SimpleMenu.keyExtractor(item);
-            return (
-              <TouchableRipple
-                style={[
-                  styles.item,
-                  selectedItemKey === key && selectedItemStyle,
-                ]}
-                onPress={() => {
-                  this.props.onItemSelected(key);
-                }}
-              >
-                {SimpleMenu.renderDataItem(item)}
-              </TouchableRipple>
-            );
-          }}
-        />
-      </Paper>
+      <ThemedPortal position={-1}>
+        <Paper elevation={2} style={{ height }}>
+          <FlatList
+            style={styles.container}
+            contentContainerStyle={styles.content}
+            data={data}
+            keyExtractor={SimpleMenu.keyExtractor}
+            renderItem={({ item }) => {
+              const key = SimpleMenu.keyExtractor(item);
+              return (
+                <TouchableRipple
+                  style={[
+                    styles.item,
+                    selectedItemKey === key && selectedItemStyle,
+                  ]}
+                  onPress={() => {
+                    this.props.onItemSelected(key);
+                  }}
+                >
+                  {SimpleMenu.renderDataItem(item)}
+                </TouchableRipple>
+              );
+            }}
+          />
+        </Paper>
+      </ThemedPortal>
     );
   }
 }
