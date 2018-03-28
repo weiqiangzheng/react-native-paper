@@ -14,6 +14,7 @@ import FABExample from './FABExample';
 import PaperExample from './PaperExample';
 import ProgressBarExample from './ProgressBarExample';
 import RadioButtonExample from './RadioButtonExample';
+import RadioButtonGroupExample from './RadioButtonGroupExample';
 import RippleExample from './RippleExample';
 import SearchBarExample from './SearchBarExample';
 import SwitchExample from './SwitchExample';
@@ -38,6 +39,7 @@ export const examples = {
   paper: PaperExample,
   progressbar: ProgressBarExample,
   radio: RadioButtonExample,
+  radioGroup: RadioButtonGroupExample,
   ripple: RippleExample,
   searchbar: SearchBarExample,
   switch: SwitchExample,
