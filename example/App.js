@@ -4,21 +4,25 @@ import Expo from 'expo';
 import * as React from 'react';
 import { StatusBar, View } from 'react-native';
 import {
+  Button,
   Provider as PaperProvider,
   DarkTheme,
   DefaultTheme,
 } from 'react-native-paper';
-import { type Theme } from 'react-native-paper/types';
+import { type Theme } from '../src/types';
 import SimpleMenu from '../src/components/SimpleMenu';
 
 type State = {
   theme: Theme,
+  menuShown: boolean,
 };
 
 class PaperExample extends React.Component<{}, State> {
   state = {
     theme: DefaultTheme,
+    menuShown: false,
   };
+  _button: any;
 
   componentDidMount() {
     StatusBar.setBarStyle('light-content');
@@ -42,6 +46,8 @@ class PaperExample extends React.Component<{}, State> {
       { label: 'Baz3' },
     ];
 
+    this._button;
+
     return (
       <PaperProvider theme={this.state.theme}>
         <View
@@ -52,13 +58,27 @@ class PaperExample extends React.Component<{}, State> {
             justifyContent: 'center',
           }}
         >
-          <SimpleMenu
-            data={data}
-            onItemSelected={item => {
-              console.log(`SelectedItem: ${item}`);
+          <Button
+            icon="add-a-photo"
+            onPress={() => {
+              this.setState(prevState => ({ menuShown: !prevState.menuShown }));
             }}
-            selectedItemKey="Baz"
-          />
+            ref={button => {
+              this._button = button;
+            }}
+          >
+            Add a photo
+          </Button>
+          {this.state.menuShown ? (
+            <SimpleMenu
+              anchorTo={this._button}
+              data={data}
+              onItemSelected={item => {
+                console.log(`SelectedItem: ${item}`);
+              }}
+              selectedItemKey="Baz"
+            />
+          ) : null}
         </View>
       </PaperProvider>
     );

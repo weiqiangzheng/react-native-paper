@@ -1,10 +1,10 @@
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import { FlatList, Text, StyleSheet } from 'react-native';
+import Anchor, { VerticalAlignment, HorizontalAlignment } from './Anchor';
 import Paper from './Paper';
 import TouchableRipple from './TouchableRipple';
-import ThemedPortal from './Portal/ThemedPortal';
 import withTheme from '../core/withTheme';
 import { type Theme } from '../types';
 
@@ -17,6 +17,7 @@ type Props = {
   data: Array<string | DataItem>,
   onItemSelected: string => void,
   selectedItemKey?: string,
+  anchorTo: React.Node,
   theme: Theme,
 };
 
@@ -38,13 +39,17 @@ class SimpleMenu extends React.Component<Props> {
   }
 
   render() {
-    const { data, selectedItemKey, theme } = this.props;
+    const { anchorTo, data, selectedItemKey, theme } = this.props;
     const height = data.length * ITEM_HEIGHT + 8;
     const selectedItemStyle = { backgroundColor: theme.colors.disabled };
 
     return (
-      <ThemedPortal position={1}>
-        <Paper style={{ elevation: 8, height, width: '90%' }}>
+      <Anchor
+        anchorTo={anchorTo}
+        vAlign={VerticalAlignment.TOP_TO_TOP}
+        hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
+      >
+        <Paper style={{ elevation: 8, height }}>
           <FlatList
             style={styles.container}
             contentContainerStyle={styles.content}
@@ -68,7 +73,7 @@ class SimpleMenu extends React.Component<Props> {
             }}
           />
         </Paper>
-      </ThemedPortal>
+      </Anchor>
     );
   }
 }
