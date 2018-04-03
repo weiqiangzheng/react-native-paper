@@ -1,7 +1,14 @@
 // @flow
 
 import * as React from 'react';
-import { FlatList, Text, StyleSheet } from 'react-native';
+import ReactNative, {
+  Animated,
+  FlatList,
+  Text,
+  StyleSheet,
+  UIManager,
+  View,
+} from 'react-native';
 import Anchor, { VerticalAlignment, HorizontalAlignment } from './Anchor';
 import Paper from './Paper';
 import TouchableRipple from './TouchableRipple';
@@ -21,27 +28,95 @@ type Props = {
   theme: Theme,
 };
 
+type State = {
+  size: ?{
+    width: number,
+    height: number,
+  },
+  heightCap: ?number,
+  reveal: Animated.Value,
+};
+
+const MENU_VERTICAL_PADDING = 4;
 const ITEM_HEIGHT = 48;
 
-class SimpleMenu extends React.Component<Props> {
-  static renderDataItem(dataItem: string | DataItem) {
+class SimpleMenu extends React.Component<Props, State> {
+  state = {
+    size: null,
+    heightCap: null,
+    reveal: new Animated.Value(0),
+  };
+
+  renderContent = () => {
+    const { data, theme, selectedItemKey } = this.props;
+    const selectedItemStyle = { backgroundColor: theme.colors.disabled };
+
     return (
-      <Text>{typeof dataItem === 'string' ? dataItem : dataItem.label}</Text>
+      <Paper style={{ elevation: 8 }}>
+        <FlatList
+          style={styles.container}
+          contentContainerStyle={styles.content}
+          data={data}
+          keyExtractor={this.keyExtractor}
+          renderItem={({ item }) => {
+            const key = this.keyExtractor(item);
+            return (
+              <TouchableRipple
+                style={[
+                  styles.item,
+                  selectedItemKey === key && selectedItemStyle,
+                ]}
+                onPress={() => {
+                  this.props.onItemSelected(key);
+                }}
+              >
+                {this.renderDataItem(item)}
+              </TouchableRipple>
+            );
+          }}
+        />
+      </Paper>
     );
-  }
+  };
 
-  static keyExtractor(item: string | DataItem) {
-    return typeof item === 'string' ? item : item.key || item.label;
-  }
+  renderDataItem = (dataItem: string | DataItem) => (
+    <Text numberOfLines={1} ellipsizeMode="clip">
+      {typeof dataItem === 'string' ? dataItem : dataItem.label}
+    </Text>
+  );
 
-  static labelExtractor(item: string | DataItem) {
-    return typeof item === 'string' ? item : item.label;
-  }
+  keyExtractor = (item: string | DataItem) =>
+    typeof item === 'string' ? item : item.key || item.label;
+
+  labelExtractor = (item: string | DataItem) =>
+    typeof item === 'string' ? item : item.label;
+
+  updateMeasure = component => {
+    if (!this.state.size) {
+      UIManager.measureInWindow(
+        ReactNative.findNodeHandle(component),
+        (x, y, width, height) => {
+          if (!width || !height) {
+            global.setImmediate(() => {
+              this.updateMeasure(component);
+            });
+          } else {
+            this.setState(
+              ({ size }) => (size ? {} : { size: { width, height } })
+            );
+            Animated.timing(this.state.reveal, {
+              toValue: 1,
+              duration: 350,
+            }).start();
+          }
+        }
+      );
+    }
+  };
 
   render() {
-    const { anchorTo, data, selectedItemKey, theme } = this.props;
-    const height = data.length * ITEM_HEIGHT + 8;
-    const selectedItemStyle = { backgroundColor: theme.colors.disabled };
+    const { anchorTo } = this.props;
+    const { size } = this.state;
 
     return (
       <Anchor
@@ -49,30 +124,31 @@ class SimpleMenu extends React.Component<Props> {
         vAlign={VerticalAlignment.TOP_TO_TOP}
         hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
       >
-        <Paper style={{ elevation: 8, height }}>
-          <FlatList
-            style={styles.container}
-            contentContainerStyle={styles.content}
-            data={data}
-            keyExtractor={SimpleMenu.keyExtractor}
-            renderItem={({ item }) => {
-              const key = SimpleMenu.keyExtractor(item);
-              return (
-                <TouchableRipple
-                  style={[
-                    styles.item,
-                    selectedItemKey === key && selectedItemStyle,
-                  ]}
-                  onPress={() => {
-                    this.props.onItemSelected(key);
-                  }}
-                >
-                  {SimpleMenu.renderDataItem(item)}
-                </TouchableRipple>
-              );
+        {size ? (
+          <Animated.View
+            style={{
+              width: this.state.reveal.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [0, size.width, size.width],
+              }),
+              height: this.state.reveal.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, size.height],
+              }),
             }}
-          />
-        </Paper>
+          >
+            {this.renderContent()}
+          </Animated.View>
+        ) : (
+          <View
+            style={{ opacity: 0 }}
+            ref={component => {
+              this.updateMeasure(component);
+            }}
+          >
+            {this.renderContent()}
+          </View>
+        )}
       </Anchor>
     );
   }
@@ -80,7 +156,7 @@ class SimpleMenu extends React.Component<Props> {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 4,
+    paddingVertical: MENU_VERTICAL_PADDING,
   },
   content: {
     alignItems: 'stretch',
