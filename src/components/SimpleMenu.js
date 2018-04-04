@@ -8,6 +8,7 @@ import ReactNative, {
   StyleSheet,
   UIManager,
   View,
+  Dimensions,
 } from 'react-native';
 import Anchor, { VerticalAlignment, HorizontalAlignment } from './Anchor';
 import Paper from './Paper';
@@ -38,6 +39,7 @@ type State = {
 };
 
 const MENU_VERTICAL_PADDING = 4;
+const MENU_VERTICAL_WINDOW_MARGIN = 8;
 const ITEM_HEIGHT = 48;
 
 class SimpleMenu extends React.Component<Props, State> {
@@ -50,6 +52,7 @@ class SimpleMenu extends React.Component<Props, State> {
   renderContent = () => {
     const { data, theme, selectedItemKey } = this.props;
     const selectedItemStyle = { backgroundColor: theme.colors.disabled };
+    const { heightCap } = this.state;
 
     return (
       <Paper style={{ elevation: 2 }}>
@@ -58,6 +61,7 @@ class SimpleMenu extends React.Component<Props, State> {
           contentContainerStyle={styles.content}
           data={data}
           keyExtractor={this.keyExtractor}
+          showsVerticalScrollIndicator={!!heightCap}
           renderItem={({ item }) => {
             const key = this.keyExtractor(item);
             return (
@@ -101,9 +105,17 @@ class SimpleMenu extends React.Component<Props, State> {
               this.updateMeasure(component);
             });
           } else {
+            const { height: windowHeight } = Dimensions.get('window');
+            if (y + height + MENU_VERTICAL_WINDOW_MARGIN > windowHeight) {
+              this.setState({
+                heightCap: windowHeight - (y + MENU_VERTICAL_WINDOW_MARGIN),
+              });
+            }
+
             this.setState(
               ({ size }) => (size ? {} : { size: { width, height } })
             );
+
             Animated.timing(this.state.reveal, {
               toValue: 1,
               duration: 300,
@@ -116,7 +128,7 @@ class SimpleMenu extends React.Component<Props, State> {
 
   render() {
     const { anchorTo } = this.props;
-    const { size } = this.state;
+    const { size, heightCap } = this.state;
 
     return (
       <Anchor
@@ -133,7 +145,7 @@ class SimpleMenu extends React.Component<Props, State> {
               }),
               height: this.state.reveal.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, size.height],
+                outputRange: [0, heightCap || size.height],
               }),
             }}
           >
