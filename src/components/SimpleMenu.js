@@ -52,7 +52,7 @@ class SimpleMenu extends React.Component<Props, State> {
     const selectedItemStyle = { backgroundColor: theme.colors.disabled };
 
     return (
-      <Paper style={{ elevation: 8 }}>
+      <Paper style={{ elevation: 2 }}>
         <FlatList
           style={styles.container}
           contentContainerStyle={styles.content}
@@ -106,7 +106,7 @@ class SimpleMenu extends React.Component<Props, State> {
             );
             Animated.timing(this.state.reveal, {
               toValue: 1,
-              duration: 350,
+              duration: 300,
             }).start();
           }
         }
@@ -128,7 +128,7 @@ class SimpleMenu extends React.Component<Props, State> {
           <Animated.View
             style={{
               width: this.state.reveal.interpolate({
-                inputRange: [0, 0.5, 1],
+                inputRange: [0, 0.25, 1],
                 outputRange: [0, size.width, size.width],
               }),
               height: this.state.reveal.interpolate({
