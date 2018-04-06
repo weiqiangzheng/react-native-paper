@@ -3,12 +3,13 @@
 import * as React from 'react';
 import ReactNative, {
   Animated,
+  Dimensions,
   FlatList,
+  Platform,
   Text,
   StyleSheet,
   UIManager,
   View,
-  Dimensions,
 } from 'react-native';
 import Anchor, { VerticalAlignment, HorizontalAlignment } from './Anchor';
 import Paper from './Paper';
@@ -99,10 +100,56 @@ class SimpleMenu extends React.Component<Props, State> {
   };
 
   renderDataItem = (dataItem: string | DataItem) => (
-    <Text numberOfLines={1} ellipsizeMode="clip">
+    <Text
+      numberOfLines={1}
+      ellipsizeMode={Platform.select({
+        ios: 'clip',
+        default: 'tail',
+      })}
+    >
       {typeof dataItem === 'string' ? dataItem : dataItem.label}
     </Text>
   );
+
+  render() {
+    const { anchorTo } = this.props;
+    const { size, heightCap } = this.state;
+
+    return (
+      <Anchor
+        anchorTo={anchorTo}
+        vAlign={VerticalAlignment.TOP_TO_TOP}
+        hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
+      >
+        {size ? (
+          <Animated.View
+            style={{
+              width: this.state.reveal.interpolate({
+                inputRange: [0, 0.25],
+                outputRange: [0, size.width],
+                extrapolate: 'clamp',
+              }),
+              height: this.state.reveal.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, heightCap || size.height],
+              }),
+            }}
+          >
+            {this.renderContent()}
+          </Animated.View>
+        ) : (
+          <View
+            style={{ opacity: 0 }}
+            ref={component => {
+              this.updateMeasure(component);
+            }}
+          >
+            {this.renderContent()}
+          </View>
+        )}
+      </Anchor>
+    );
+  }
 
   keyExtractor = (item: string | DataItem) =>
     typeof item === 'string' ? item : item.key || item.label;
@@ -155,46 +202,6 @@ class SimpleMenu extends React.Component<Props, State> {
       );
     }
   };
-
-  render() {
-    const { anchorTo } = this.props;
-    const { size, heightCap } = this.state;
-
-    return (
-      <Anchor
-        anchorTo={anchorTo}
-        vAlign={VerticalAlignment.TOP_TO_TOP}
-        hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
-      >
-        {size ? (
-          <Animated.View
-            style={{
-              width: this.state.reveal.interpolate({
-                inputRange: [0, 0.25],
-                outputRange: [0, size.width],
-                extrapolate: 'clamp',
-              }),
-              height: this.state.reveal.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, heightCap || size.height],
-              }),
-            }}
-          >
-            {this.renderContent()}
-          </Animated.View>
-        ) : (
-          <View
-            style={{ opacity: 0 }}
-            ref={component => {
-              this.updateMeasure(component);
-            }}
-          >
-            {this.renderContent()}
-          </View>
-        )}
-      </Anchor>
-    );
-  }
 }
 
 const styles = StyleSheet.create({
