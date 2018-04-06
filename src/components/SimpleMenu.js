@@ -76,6 +76,11 @@ class SimpleMenu extends React.Component<Props, State> {
           data={data}
           keyExtractor={this.keyExtractor}
           showsVerticalScrollIndicator={!!heightCap}
+          getItemLayout={(unused, index) => ({
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+            index,
+          })}
           renderItem={({ item, index }) => {
             const key = this.keyExtractor(item);
             return (
