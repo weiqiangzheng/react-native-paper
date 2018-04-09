@@ -26,8 +26,9 @@ type Props = {
   data: Array<string | DataItem>,
   onItemSelected: string => void,
   selectedItemKey?: string,
-  anchorTo: React.Node,
   theme: Theme,
+  visible: boolean,
+  children: React.Node,
 };
 
 type State = {
@@ -35,6 +36,7 @@ type State = {
     width: number,
     height: number,
   },
+  anchorTo?: React.Node,
   heightCap: ?number,
   reveal: Animated.Value,
   itemReveal: Array<Animated.Value>,
@@ -117,42 +119,56 @@ class SimpleMenu extends React.Component<Props, State> {
   );
 
   render() {
-    const { anchorTo } = this.props;
-    const { size, heightCap } = this.state;
+    const { anchorTo, size, heightCap } = this.state;
+    const { visible } = this.props;
 
     return (
-      <Anchor
-        anchorTo={anchorTo}
-        vAlign={VerticalAlignment.TOP_TO_TOP}
-        hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
-      >
-        {size ? (
+      <View>
+        <View
+          ref={ref => {
+            if (ref && !this.state.anchorTo) {
+              this.setState(
+                prevState => (prevState.anchorTo ? {} : { anchorTo: ref })
+              );
+            }
+          }}
+          collapsable={false}
+        >
+          {this.props.children}
+        </View>
+        <Anchor
+          anchorTo={anchorTo}
+          vAlign={VerticalAlignment.TOP_TO_TOP}
+          hAlign={HorizontalAlignment.RIGHT_TO_RIGHT}
+        >
           <Animated.View
-            style={{
-              width: this.state.reveal.interpolate({
-                inputRange: [0, 0.25],
-                outputRange: [0, size.width],
-                extrapolate: 'clamp',
-              }),
-              height: this.state.reveal.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, heightCap || size.height],
-              }),
+            ref={component => {
+              if (component) this.updateMeasure(component);
             }}
+            style={
+              size
+                ? {
+                    width: visible
+                      ? this.state.reveal.interpolate({
+                          inputRange: [0, 0.25],
+                          outputRange: [0, size.width],
+                          extrapolate: 'clamp',
+                        })
+                      : 0,
+                    height: visible
+                      ? this.state.reveal.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, heightCap || size.height],
+                        })
+                      : 0,
+                  }
+                : { opacity: 0 }
+            }
           >
             {this.renderContent()}
           </Animated.View>
-        ) : (
-          <View
-            style={{ opacity: 0 }}
-            ref={component => {
-              this.updateMeasure(component);
-            }}
-          >
-            {this.renderContent()}
-          </View>
-        )}
-      </Anchor>
+        </Anchor>
+      </View>
     );
   }
 

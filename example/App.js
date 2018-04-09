@@ -58,27 +58,29 @@ class PaperExample extends React.Component<{}, State> {
             justifyContent: 'center',
           }}
         >
-          <Button
-            icon="add-a-photo"
-            onPress={() => {
-              this.setState(prevState => ({ menuShown: !prevState.menuShown }));
+          <SimpleMenu
+            anchorTo={this._button}
+            data={data}
+            onItemSelected={item => {
+              console.log(`SelectedItem: ${item}`);
             }}
-            ref={button => {
-              this._button = button;
-            }}
+            selectedItemKey="Baz"
+            visible={this.state.menuShown}
           >
-            Add a photo
-          </Button>
-          {this.state.menuShown ? (
-            <SimpleMenu
-              anchorTo={this._button}
-              data={data}
-              onItemSelected={item => {
-                console.log(`SelectedItem: ${item}`);
+            <Button
+              icon="add-a-photo"
+              onPress={() => {
+                this.setState(prevState => ({
+                  menuShown: !prevState.menuShown,
+                }));
               }}
-              selectedItemKey="Baz"
-            />
-          ) : null}
+              ref={button => {
+                this._button = button;
+              }}
+            >
+              Add a photo
+            </Button>
+          </SimpleMenu>
         </View>
       </PaperProvider>
     );

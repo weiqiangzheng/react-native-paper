@@ -57,10 +57,18 @@ export default class Anchor extends React.Component<Props, State> {
   }
 
   updateAnchorDimensions(anchorElement: React.Node) {
-    const node = ReactNative.findNodeHandle(anchorElement);
-    UIManager.measureInWindow(node, (x, y, width, height) => {
-      this.setState({ anchorDimensions: { x, y, width, height } });
-    });
+    const nodeHandle = ReactNative.findNodeHandle(anchorElement);
+    if (nodeHandle) {
+      UIManager.measureInWindow(nodeHandle, (x, y, width, height) => {
+        // If we call this too early, we might get 0 width & height measurements...
+        if (width && height) {
+          this.setState({ anchorDimensions: { x, y, width, height } });
+        } else {
+          // ... but this should be available immediately
+          global.setImmediate(() => this.updateAnchorDimensions(anchorElement));
+        }
+      });
+    }
   }
 
   getVPosition(anchorDimensions: Measure): VPosition {
