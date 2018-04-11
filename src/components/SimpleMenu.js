@@ -24,7 +24,7 @@ type DataItem = {
 
 type Props = {
   data: Array<string | DataItem>,
-  onItemSelected: string => void,
+  onItemSelected: (string, number) => void,
   selectedItemKey?: string,
   theme: Theme,
   visible: boolean,
@@ -93,7 +93,7 @@ class SimpleMenu extends React.Component<Props, State> {
                     selectedItemKey === key && selectedItemStyle,
                   ]}
                   onPress={() => {
-                    this.props.onItemSelected(key);
+                    this.props.onItemSelected(key, index);
                   }}
                 >
                   {this.renderDataItem(item)}
