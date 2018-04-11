@@ -6,20 +6,21 @@ import ReactNative, { Dimensions, UIManager, View } from 'react-native';
 
 import Portal from './Portal/Portal';
 
-export const VerticalAlignment = {
-  CENTER: 0x1,
-  TOP_TO_TOP: 0x2,
-  TOP_TO_BOTTOM: 0x3,
-  BOTTOM_TO_BOTTOM: 0x4,
-  BOTTOM_TO_TOP: 0x5,
+opaque type VerticalAlignmentType = number;
+opaque type HorizontalAlignmentType = number;
+
+export const VerticalAlignment: { [string]: VerticalAlignmentType } = {
+  TOP_TO_TOP: 0x1,
+  TOP_TO_BOTTOM: 0x2,
+  BOTTOM_TO_BOTTOM: 0x3,
+  BOTTOM_TO_TOP: 0x4,
 };
 
-export const HorizontalAlignment = {
-  CENTER: 0x11,
-  LEFT_TO_LEFT: 0x12,
-  LEFT_TO_RIGHT: 0x13,
-  RIGHT_TO_RIGHT: 0x14,
-  RIGHT_TO_LEFT: 0x15,
+export const HorizontalAlignment: { [string]: HorizontalAlignmentType } = {
+  LEFT_TO_LEFT: 0x11,
+  LEFT_TO_RIGHT: 0x12,
+  RIGHT_TO_RIGHT: 0x13,
+  RIGHT_TO_LEFT: 0x14,
 };
 
 type VPosition = {| top: number |} | {| bottom: number |};
@@ -27,8 +28,8 @@ type HPosition = {| left: number |} | {| right: number |};
 
 type Props = {
   anchorTo: React.Node,
-  vAlign: $Values<typeof VerticalAlignment>,
-  hAlign: $Values<typeof HorizontalAlignment>,
+  vAlign: VerticalAlignmentType,
+  hAlign: HorizontalAlignmentType,
   children: React.Node,
 };
 
