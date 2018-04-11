@@ -39,6 +39,7 @@ type State = {
   anchorTo?: React.Node,
   heightCap: ?number,
   reveal: Animated.Value,
+  hide: Animated.Value,
   itemReveal: Array<Animated.Value>,
 };
 
@@ -47,6 +48,7 @@ const MENU_VERTICAL_WINDOW_MARGIN = 8;
 const ITEM_HEIGHT = 48;
 
 const MENU_REVEAL_DURATION_MILLIS = 300;
+const MENU_HIDE_DURATION_MILLIS = 250;
 const ITEM_REVEAL_DURATION_MILLIS = 250;
 
 class SimpleMenu extends React.Component<Props, State> {
@@ -61,6 +63,7 @@ class SimpleMenu extends React.Component<Props, State> {
       size: null,
       heightCap: null,
       reveal: new Animated.Value(0),
+      hide: new Animated.Value(0),
       itemReveal,
     };
   }
@@ -161,6 +164,7 @@ class SimpleMenu extends React.Component<Props, State> {
                           outputRange: [0, heightCap || size.height],
                         })
                       : 0,
+                    opacity: visible ? 1 : this.state.hide,
                   }
                 : { opacity: 0 }
             }
@@ -170,6 +174,37 @@ class SimpleMenu extends React.Component<Props, State> {
         </Anchor>
       </View>
     );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.visible && !nextProps.visible) {
+      Animated.timing(this.state.hide, {
+        toValue: 0,
+        duration: MENU_HIDE_DURATION_MILLIS,
+      }).start();
+    } else if (!this.props.visible && nextProps.visible) {
+      const { size, heightCap } = this.state;
+      if (!size) {
+        return;
+      }
+      const actualHeight = heightCap || size.height;
+      const itemsShown = actualHeight / ITEM_HEIGHT;
+
+      Animated.stagger(
+        MENU_REVEAL_DURATION_MILLIS / itemsShown,
+        this.state.itemReveal.map(itemAnimValue =>
+          Animated.timing(itemAnimValue, {
+            duration: ITEM_REVEAL_DURATION_MILLIS,
+            toValue: 1,
+          })
+        )
+      ).start();
+
+      Animated.timing(this.state.reveal, {
+        toValue: 1,
+        duration: MENU_REVEAL_DURATION_MILLIS,
+      }).start();
+    }
   }
 
   keyExtractor = (item: string | DataItem) =>
@@ -196,27 +231,7 @@ class SimpleMenu extends React.Component<Props, State> {
             }
 
             this.setState(
-              ({ size }) => (size ? {} : { size: { width, height } }),
-              () => {
-                const { heightCap } = this.state;
-                const actualHeight = heightCap || height;
-                const itemsShown = actualHeight / ITEM_HEIGHT;
-
-                Animated.stagger(
-                  MENU_REVEAL_DURATION_MILLIS / itemsShown,
-                  this.state.itemReveal.map(itemAnimValue =>
-                    Animated.timing(itemAnimValue, {
-                      duration: ITEM_REVEAL_DURATION_MILLIS,
-                      toValue: 1,
-                    })
-                  )
-                ).start();
-
-                Animated.timing(this.state.reveal, {
-                  toValue: 1,
-                  duration: MENU_REVEAL_DURATION_MILLIS,
-                }).start();
-              }
+              ({ size }) => (size ? {} : { size: { width, height } })
             );
           }
         }
