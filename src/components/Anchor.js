@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import ReactNative, { Dimensions, UIManager, View } from 'react-native';
 
-import Portal from './Portal/Portal';
+import ThemedPortal from './Portal/ThemedPortal';
 
 opaque type VerticalAlignmentType = number;
 opaque type HorizontalAlignmentType = number;
@@ -123,9 +123,9 @@ export default class Anchor extends React.Component<Props, State> {
       };
 
       return (
-        <Portal>
+        <ThemedPortal>
           <View style={style}>{children}</View>
-        </Portal>
+        </ThemedPortal>
       );
     }
     return null;
